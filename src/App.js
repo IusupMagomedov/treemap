@@ -21,15 +21,19 @@ const menuArray = [
       
     }
   ]
-
+const w = 1000
+const h = 600
 
 function App() {
-  const [menuId, setMenuId] = useState(1)
+  const [menuId, setMenuId] = useState(0)
 
   const [movieData, setMovieData] = useState([])
   const [videoGameData, setVideoGameData] = useState([])
   const [kickstarterPledgesData, setKickstarterPledgesData] = useState([])
 
+
+
+  const svgRef = useRef(null)
 
   useEffect(() => {
     d3.json(movieDataURL).then(
@@ -72,10 +76,33 @@ function App() {
       // console.log('Movie data in main useEffect hook: ', movieData)
       // console.log('Video game data in main useEffect hook: ', videoGameData)
       // console.log('Kickstarter pladges data in main useEffect hook: ', kickstarterPledgesData)
+      const svg = d3.select(svgRef.current)
+                    .attr('width', w)
+                    .attr('height', h)
+
+      const data = [movieData, videoGameData, kickstarterPledgesData][menuId]
+      const hierarchy = d3.hierarchy(data, node => node.children)
+        .sum(node => node.value)
+        .sort((node1, node2) => node2.value - node1.value)
+      // console.log("Data ", data.name, " in d3 hierarchy after creation: ", hierarchy)
+      const createTreeMap = d3.treemap()
+        .size([w, h])
+      
+      createTreeMap(hierarchy)
+
+      const g = svg.selectAll('g')
+        .data(hierarchy.leaves())
+        .enter()
+        .append('g')
+
+      g.append('rect')
+        .attr('class', 'tile')
+
+      g.append('text')
     }
   
     return () => {}
-  }, [movieData, videoGameData, kickstarterPledgesData])
+  }, [movieData, videoGameData, kickstarterPledgesData, menuId])
   
   
   
@@ -92,7 +119,7 @@ function App() {
       <main>
         <h1 id="title">{menuArray[menuId].title}</h1>
         <h3 id="description">{menuArray[menuId].description}</h3>
-        <svg></svg>
+        <svg ref={svgRef}></svg>
       </main>
       <footer>This project was developed by iUsup Magomedov as a FCC D3 certification project</footer>
     </div>
