@@ -31,6 +31,19 @@ function App() {
   const [videoGameData, setVideoGameData] = useState([])
   const [kickstarterPledgesData, setKickstarterPledgesData] = useState([])
 
+  const pickUpColor = (category, categories) => {
+    const indexOfCategory = categories.indexOf(category)
+    // console.log("Categories in pickUpColor function: ", categories)
+    // console.log("Category in pickUpColor function: ", category)
+    const colors = ["Blue ", "Green", "Red", "Orange", "Violet", "Indigo", "Yellow "]
+    const color = colors[indexOfCategory % colors.length]
+    // console.log("Color in pickUpColor function: ", colors)
+    // console.log("Color in pickUpColor function: ", color)
+    return color
+  }
+
+
+
 
 
   const svgRef = useRef(null)
@@ -76,6 +89,7 @@ function App() {
       // console.log('Movie data in main useEffect hook: ', movieData)
       // console.log('Video game data in main useEffect hook: ', videoGameData)
       // console.log('Kickstarter pladges data in main useEffect hook: ', kickstarterPledgesData)
+   
       const svg = d3.select(svgRef.current)
                     .attr('width', w)
                     .attr('height', h)
@@ -84,7 +98,10 @@ function App() {
       const hierarchy = d3.hierarchy(data, node => node.children)
         .sum(node => node.value)
         .sort((node1, node2) => node2.value - node1.value)
-      // console.log("Data ", data.name, " in d3 hierarchy after creation: ", hierarchy)
+      console.log("Data ", data.name, " in d3 hierarchy after creation: ", hierarchy)
+         
+      const categories = [...new Set(data.children.map(element => element.name))]
+      console.log("Categories array before using 3d: ", categories)
       const createTreeMap = d3.treemap()
         .size([w, h])
       
@@ -97,6 +114,7 @@ function App() {
 
       g.append('rect')
         .attr('class', 'tile')
+        .attr('fill', movie => pickUpColor(movie.data.category, categories))
 
       g.append('text')
     }
