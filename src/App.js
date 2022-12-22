@@ -23,6 +23,7 @@ const menuArray = [
   ]
 const w = 1000
 const h = 600
+const padding = 100
 
 function App() {
   const [menuId, setMenuId] = useState(0)
@@ -98,25 +99,44 @@ function App() {
       const hierarchy = d3.hierarchy(data, node => node.children)
         .sum(node => node.value)
         .sort((node1, node2) => node2.value - node1.value)
-      console.log("Data ", data.name, " in d3 hierarchy after creation: ", hierarchy)
+      // console.log("Data ", data.name, " in d3 hierarchy after creation: ", hierarchy)
          
       const categories = [...new Set(data.children.map(element => element.name))]
-      console.log("Categories array before using 3d: ", categories)
+      // console.log("Categories array before using 3d: ", categories)
       const createTreeMap = d3.treemap()
-        .size([w, h])
+        .size([w - padding, h - padding])
       
       createTreeMap(hierarchy)
-
+      console.log('Leave nodes in hierarchy: ', hierarchy.leaves())
       const g = svg.selectAll('g')
         .data(hierarchy.leaves())
         .enter()
         .append('g')
+        .attr('transform', leaveNode => `translate(${leaveNode.x0}, ${leaveNode.y0})`)
 
       g.append('rect')
         .attr('class', 'tile')
-        .attr('fill', movie => pickUpColor(movie.data.category, categories))
+        .attr('fill', leaveNode => pickUpColor(leaveNode.data.category, categories))
+        .attr('data-name', leaveNode => leaveNode.data.name)
+        .attr('data-category', leaveNode => leaveNode.data.category) 
+        .attr('data-value', leaveNode => leaveNode.data.value)
+        .attr('width', leaveNode => leaveNode.x1 - leaveNode.x0)
+        .attr('height', leaveNode => leaveNode.y1 - leaveNode.y0)
+        .attr('stroke-width', '2px')
+        .attr('stroke', 'white')
+
 
       g.append('text')
+        .text(leaveNode => leaveNode.data.name)
+        .attr('x', '5')
+        .attr('y', '20')
+
+      const legend = svg.append('g')
+        .attr('transform', `translate(${2 * padding}, ${h - padding})`)
+        .append('rect')
+        .attr('width', 10)
+        .attr('height', 10)
+        .attr('fill', 'blue')
     }
   
     return () => {}
