@@ -22,11 +22,11 @@ const menuArray = [
     }
   ]
 const w = 1000
-const h = 600
-const padding = 100
-
+const h = 800
+const padding = 200
+const legendEdge = 20
 function App() {
-  const [menuId, setMenuId] = useState(0)
+  const [menuId, setMenuId] = useState(1)
 
   const [movieData, setMovieData] = useState([])
   const [videoGameData, setVideoGameData] = useState([])
@@ -36,7 +36,7 @@ function App() {
     const indexOfCategory = categories.indexOf(category)
     // console.log("Categories in pickUpColor function: ", categories)
     // console.log("Category in pickUpColor function: ", category)
-    const colors = ["Blue ", "Green", "Red", "Orange", "Violet", "Indigo", "Yellow "]
+    const colors = ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"]
     const color = colors[indexOfCategory % colors.length]
     // console.log("Color in pickUpColor function: ", colors)
     // console.log("Color in pickUpColor function: ", color)
@@ -107,7 +107,7 @@ function App() {
         .size([w - padding, h - padding])
       
       createTreeMap(hierarchy)
-      console.log('Leave nodes in hierarchy: ', hierarchy.leaves())
+      // console.log('Leave nodes in hierarchy: ', hierarchy.leaves())
       const g = svg.selectAll('g')
         .data(hierarchy.leaves())
         .enter()
@@ -122,21 +122,37 @@ function App() {
         .attr('data-value', leaveNode => leaveNode.data.value)
         .attr('width', leaveNode => leaveNode.x1 - leaveNode.x0)
         .attr('height', leaveNode => leaveNode.y1 - leaveNode.y0)
-        .attr('stroke-width', '2px')
+        .attr('stroke-width', '1px')
         .attr('stroke', 'white')
 
 
       g.append('text')
-        .text(leaveNode => leaveNode.data.name)
         .attr('x', '5')
         .attr('y', '20')
+        .append('tspan')
+        .text(leaveNode => leaveNode.data.name)
 
       const legend = svg.append('g')
-        .attr('transform', `translate(${2 * padding}, ${h - padding})`)
-        .append('rect')
-        .attr('width', 10)
-        .attr('height', 10)
-        .attr('fill', 'blue')
+        .attr('transform', `translate(${2 * padding}, ${h - padding + 20})`)
+        .attr('id', 'legend')
+        .selectAll('rect')
+        .data(hierarchy.data.children)
+        .enter()
+        .append('g')
+      
+      legend.append('rect')
+        .attr('class', 'legend-item')
+        .attr('width', legendEdge)
+        .attr('height', legendEdge)
+        .attr('x', legendEdge)
+        .attr('y', (ganre, index) => index * (legendEdge + 5))
+        .attr('fill', child => pickUpColor(child.name, categories))
+        .attr('stroke', 'black')
+      
+      legend.append('text')
+        .text(child => child.name)
+        .attr('x', legendEdge * 2 + 5)
+        .attr('y', (child, index) => index * (legendEdge + 5) + 14)
     }
   
     return () => {}
