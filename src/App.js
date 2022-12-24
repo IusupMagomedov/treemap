@@ -25,6 +25,7 @@ const w = 1000
 const h = 800
 const padding = 200
 const legendEdge = 20
+const legendMaxRows = 4
 function App() {
   const [menuId, setMenuId] = useState(1)
 
@@ -41,6 +42,21 @@ function App() {
     // console.log("Color in pickUpColor function: ", colors)
     // console.log("Color in pickUpColor function: ", color)
     return color
+  }
+  const addSpan = textIn => {
+    const words = textIn.split(' ')
+    let textOut = ''
+    let spaser = 0 // For decrease spase between spans in case short words 
+    for (let index = 0; index < words.length; index++) {
+      if(words[index].length < 3) { //if word is short we don't put it in a new string
+        textOut = `${textOut.substr(0, textOut.length - 8)} ${words[index]}</tspan>`
+        spaser++ //Increase spacer
+      }
+      // I use spacer to decrease interval between strings
+      else textOut = `${textOut}<tspan x='5' y='${(index - spaser) * 8 + 10}'>${words[index]}</tspan>`
+    }
+    console.log('textOut value in addSpan function: ', textOut)
+    return textOut
   }
 
 
@@ -127,10 +143,10 @@ function App() {
 
 
       g.append('text')
+        .style("font-size", "10px")
         .attr('x', '5')
         .attr('y', '20')
-        .append('tspan')
-        .text(leaveNode => leaveNode.data.name)
+        .html(leaveNode => addSpan(leaveNode.data.name))
 
       const legend = svg.append('g')
         .attr('transform', `translate(${2 * padding}, ${h - padding + 20})`)
@@ -144,7 +160,7 @@ function App() {
         .attr('class', 'legend-item')
         .attr('width', legendEdge)
         .attr('height', legendEdge)
-        .attr('x', legendEdge)
+        .attr('x', (ganre, index) => Math.floor(index / legendMaxRows) * 200 + legendEdge)
         .attr('y', (ganre, index) => index * (legendEdge + 5))
         .attr('fill', child => pickUpColor(child.name, categories))
         .attr('stroke', 'black')
