@@ -34,7 +34,6 @@ function App() {
   const [movieData, setMovieData] = useState([])
   const [videoGameData, setVideoGameData] = useState([])
   const [kickstarterPledgesData, setKickstarterPledgesData] = useState([])
-  const [tip, setTip] = useState({})
 
   const pickUpColor = (category, categories) => {
     const indexOfCategory = categories.indexOf(category)
@@ -134,8 +133,12 @@ function App() {
       const svg = d3.select(svgRef.current)
                     .attr('width', w)
                     .attr('height', h)
-
-      const data = [movieData, videoGameData, kickstarterPledgesData][menuId]
+      
+      svg.selectAll("*").remove()
+      
+      const data = [videoGameData, movieData, kickstarterPledgesData][menuId]
+      console.log('Menu id after data creation: ', menuId)
+      console.log('Data after creation: ', data)
       const hierarchy = d3.hierarchy(data, node => node.children)
         .sum(node => node.value)
         .sort((node1, node2) => node2.value - node1.value)
@@ -168,8 +171,8 @@ function App() {
         .attr('stroke-width', '1px')
         .attr('stroke', 'white')
         .on('mouseover', (event, leaveNode) => {
-          console.log("Leave node in mouse over call back function: ", leaveNode)
-          console.log("Mouse event in mouse over call back function: ", event)
+          // console.log("Leave node in mouse over call back function: ", leaveNode)
+          // console.log("Mouse event in mouse over call back function: ", event)
 
           // ----- Some hover over effects ----------------------
           const target = d3.select(event.target) 
