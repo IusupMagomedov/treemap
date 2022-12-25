@@ -26,6 +26,8 @@ const h = 800
 const padding = 200
 const legendEdge = 20
 const legendMaxRows = 4
+const legendInterval = 200
+const textIndent = 23
 function App() {
   const [menuId, setMenuId] = useState(1)
 
@@ -43,17 +45,45 @@ function App() {
     // console.log("Color in pickUpColor function: ", color)
     return color
   }
+
+  // Gets a string, splits it into array of words, 
+  // then fow each word in array makes a new string, 
+  // which wraps words in <tspan> tags.
+  // It is for displaying each word on a new string 
+  // in treemap block. In care word's kensth is less then 
+  // 3 charachters it don't makes a new string and adds 
+  // a short word to the previous <tspan> tag.
+  // For not ctreatin an empty strings it uses 
+  // spaser value. The spaser increases to decrease 
+  // count of strings fp displaying. 
   const addSpan = textIn => {
     const words = textIn.split(' ')
     let textOut = ''
-    let spaser = 0 // For decrease spase between spans in case short words 
+    const shortWordLength = 3
+    const xPadding = 5
+    const yPadding = 10
+    const lineSpacing = 8
+    // For decrease spase between spans in case short words 
+    let spaser = 0 
     for (let index = 0; index < words.length; index++) {
-      if(words[index].length < 3) { //if word is short we don't put it in a new string
-        textOut = `${textOut.substr(0, textOut.length - 8)} ${words[index]}</tspan>`
-        spaser++ //Increase spacer
+      if(words[index].length < shortWordLength) { 
+        // if word is short we don't put it in a new string
+        // remove ending </tspan> tag for opening it
+        const openedTextOut = textOut.substr(0, textOut.length - 8)
+        // create additional word
+        const addWord = words[index]
+        // create a new text out string and close <tspan> tag
+        textOut = `${openedTextOut} ${addWord}</tspan>`
+        //Increase spacer
+        spaser++ 
       }
       // I use spacer to decrease interval between strings
-      else textOut = `${textOut}<tspan x='5' y='${(index - spaser) * 8 + 10}'>${words[index]}</tspan>`
+      else {
+        // creating a new string if word is not short 
+        textOut = 
+        // prev text + opening tspan tag + y and x coordinates + another word + closing tspan tag
+        `${textOut}<tspan x='${xPadding}' y='${(index - spaser) * lineSpacing + yPadding}'>${words[index]}</tspan>`
+      }
     }
     console.log('textOut value in addSpan function: ', textOut)
     return textOut
@@ -149,7 +179,7 @@ function App() {
         .html(leaveNode => addSpan(leaveNode.data.name))
 
       const legend = svg.append('g')
-        .attr('transform', `translate(${2 * padding}, ${h - padding + 20})`)
+        .attr('transform', `translate(0, ${h - padding + 20})`)
         .attr('id', 'legend')
         .selectAll('rect')
         .data(hierarchy.data.children)
@@ -160,15 +190,15 @@ function App() {
         .attr('class', 'legend-item')
         .attr('width', legendEdge)
         .attr('height', legendEdge)
-        .attr('x', (ganre, index) => Math.floor(index / legendMaxRows) * 200 + legendEdge)
-        .attr('y', (ganre, index) => index * (legendEdge + 5))
+        .attr('x', (ganre, index) => Math.floor(index / legendMaxRows) * legendInterval + legendEdge)
+        .attr('y', (ganre, index) => (index % legendMaxRows) * (legendEdge + 5))
         .attr('fill', child => pickUpColor(child.name, categories))
         .attr('stroke', 'black')
       
       legend.append('text')
         .text(child => child.name)
-        .attr('x', legendEdge * 2 + 5)
-        .attr('y', (child, index) => index * (legendEdge + 5) + 14)
+        .attr('x', (ganre, index) => Math.floor(index / legendMaxRows) * legendInterval + legendEdge + textIndent)
+        .attr('y', (ganre, index) => (index % legendMaxRows) * (legendEdge + 5) + 14)
     }
   
     return () => {}
