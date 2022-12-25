@@ -29,17 +29,18 @@ const legendMaxRows = 4
 const legendInterval = 200
 const textIndent = 23
 function App() {
-  const [menuId, setMenuId] = useState(1)
+  const [menuId, setMenuId] = useState(0)
 
   const [movieData, setMovieData] = useState([])
   const [videoGameData, setVideoGameData] = useState([])
   const [kickstarterPledgesData, setKickstarterPledgesData] = useState([])
+  const [tip, setTip] = useState({})
 
   const pickUpColor = (category, categories) => {
     const indexOfCategory = categories.indexOf(category)
     // console.log("Categories in pickUpColor function: ", categories)
     // console.log("Category in pickUpColor function: ", category)
-    const colors = ["#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a", "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"]
+    const colors = ['#63caff', '#7cd9f5', '#9be8e1', '#c1f5b9', '#f7ff39', '#e0b8a7', '#eb9d9c', '#f38191', '#f16885']
     const color = colors[indexOfCategory % colors.length]
     // console.log("Color in pickUpColor function: ", colors)
     // console.log("Color in pickUpColor function: ", color)
@@ -76,7 +77,7 @@ function App() {
         textOut = `${textOut}<tspan x='${xPadding}' y='${(index - spacer) * lineSpacing + yPadding}'>${words[index]}</tspan>`
       }
     }
-    console.log('textOut value in addSpan function: ', textOut)
+    // console.log('textOut value in addSpan function: ', textOut)
     return textOut
   }
         
@@ -86,6 +87,7 @@ function App() {
 
 
   const svgRef = useRef(null)
+  const toolTipRef = useRef(null)
 
   useEffect(() => {
     d3.json(movieDataURL).then(
@@ -152,6 +154,9 @@ function App() {
         .append('g')
         .attr('transform', leaveNode => `translate(${leaveNode.x0}, ${leaveNode.y0})`)
 
+
+      const tooltip = d3.select(toolTipRef.current)
+
       g.append('rect')
         .attr('class', 'tile')
         .attr('fill', leaveNode => pickUpColor(leaveNode.data.category, categories))
@@ -162,6 +167,31 @@ function App() {
         .attr('height', leaveNode => leaveNode.y1 - leaveNode.y0)
         .attr('stroke-width', '1px')
         .attr('stroke', 'white')
+        .on('mouseover', (event, leaveNode) => {
+          console.log("Leave node in mouse over call back function: ", leaveNode)
+          console.log("Mouse event in mouse over call back function: ", event)
+
+          // ----- Some hover over effects ----------------------
+          const target = d3.select(event.target) 
+          target.attr('stroke-width', '3px')
+
+          // ----- Modify tooltip according our county
+          tooltip.transition() // transition method for changing style
+            .style('visibility', 'visible')
+            .style('position', 'absolute')
+            .style('top', `${event.y + 5}px`)
+            .style('left', `${event.x + 20}px`)
+            .attr('id', 'tooltip')
+            .attr('data-value', leaveNode.data.value)
+            .text(`Name: ${leaveNode.data.name} Category: ${leaveNode.data.category} Value: ${leaveNode.data.value}`)        
+        })
+        .on('mouseout', event => { // We need to change modifications after mouse went out
+          tooltip.transition().style('visibility', 'hidden')
+          const target = d3.select(event.target)
+          target.transition()
+            .attr('stroke-width', '1px')
+        })
+        
 
 
       g.append('text')
@@ -186,6 +216,7 @@ function App() {
         .attr('y', (ganre, index) => (index % legendMaxRows) * (legendEdge + 5))
         .attr('fill', child => pickUpColor(child.name, categories))
         .attr('stroke', 'black')
+        
       
       legend.append('text')
         .text(child => child.name)
@@ -214,6 +245,8 @@ function App() {
         <svg ref={svgRef}></svg>
       </main>
       <footer>This project was developed by iUsup Magomedov as a FCC D3 certification project</footer>
+      <div id="tooltip" ref={toolTipRef}>
+      </div>
     </div>
   );
 }
