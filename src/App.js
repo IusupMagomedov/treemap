@@ -47,15 +47,16 @@ function App() {
   }
 
   // Gets a string, splits it into array of words, 
-  // then fow each word in array makes a new string, 
+  // then for each word in array makes a new string, 
   // which wraps words in <tspan> tags.
   // It is for displaying each word on a new string 
-  // in treemap block. In care word's kensth is less then 
-  // 3 charachters it don't makes a new string and adds 
+  // in treemap block. In case word's length is less then 
+  // 3 characters it doesn’t makes a new string and adds 
   // a short word to the previous <tspan> tag.
-  // For not ctreatin an empty strings it uses 
-  // spaser value. The spaser increases to decrease 
-  // count of strings fp displaying. 
+  // For not create in an empty string it uses 
+  // spacer value. The spacer increases to decrease 
+  // count of strings for displaying. 
+
   const addSpan = textIn => {
     const words = textIn.split(' ')
     let textOut = ''
@@ -63,11 +64,11 @@ function App() {
     const xPadding = 5
     const yPadding = 10
     const lineSpacing = 8
-    // For decrease spase between spans in case short words 
-    let spaser = 0 
+    // For decrease space between spans in case short words 
+    let spacer = 0 
     for (let index = 0; index < words.length; index++) {
       if(words[index].length < shortWordLength) { 
-        // if word is short we don't put it in a new string
+        // if word is short, we don't put it in a new string
         // remove ending </tspan> tag for opening it
         const openedTextOut = textOut.substr(0, textOut.length - 8)
         // create additional word
@@ -75,19 +76,20 @@ function App() {
         // create a new text out string and close <tspan> tag
         textOut = `${openedTextOut} ${addWord}</tspan>`
         //Increase spacer
-        spaser++ 
+        spacer++ 
       }
       // I use spacer to decrease interval between strings
       else {
         // creating a new string if word is not short 
         textOut = 
-        // prev text + opening tspan tag + y and x coordinates + another word + closing tspan tag
-        `${textOut}<tspan x='${xPadding}' y='${(index - spaser) * lineSpacing + yPadding}'>${words[index]}</tspan>`
+        // previous text + opening tspan tag + y and x coordinates + another word + closing tspan tag
+        `${textOut}<tspan x='${xPadding}' y='${(index - spacer) * lineSpacing + yPadding}'>${words[index]}</tspan>`
       }
     }
     console.log('textOut value in addSpan function: ', textOut)
     return textOut
   }
+        
 
 
 
